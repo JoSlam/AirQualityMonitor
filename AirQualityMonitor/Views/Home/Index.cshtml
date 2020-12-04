@@ -1,0 +1,18 @@
+﻿@model List<AirQualityMonitor.Models.Reading>
+@{
+    ViewData["Title"] = "Home";
+    Layout = "~/Pages/_Layout.cshtml";
+}
+
+<h2>Home</h2>
+
+<ul>
+    @foreach (var item in Model)
+    {
+        <li>Device ID: @item.Device_ID</li>
+    }
+</ul>
+
+<div id="chart-container">
+    <div id="content" class="row"></div>
+</div>
