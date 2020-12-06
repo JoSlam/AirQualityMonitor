@@ -8,7 +8,7 @@ appsettings.json
 appsettings.*.json
 
 #JS files
-wwwroot/js/chartData.js
+wwwroot/js/
 
 
 # User-specific files
