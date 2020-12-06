@@ -1,4 +1,4 @@
-﻿@model List<AirQualityMonitor.Models.Reading>
+﻿@model List<AirQualityMonitor.Models.ChartData>
 @{
     ViewData["Title"] = "Home";
     Layout = "~/Pages/_Layout.cshtml";
@@ -10,10 +10,15 @@
 <ul>
     @foreach (var item in Model)
     {
-        <li>Device ID: @item.Device_ID</li>
+        <li>Chart ID: @item.ID</li>
     }
 </ul>
 
 <div id="chart-container">
     <div id="content" class="row"></div>
 </div>
+
+
+<script type="text/javascript">
+    var chartDataSets = 
+</script>

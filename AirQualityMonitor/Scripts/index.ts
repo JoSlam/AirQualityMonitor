@@ -9,6 +9,8 @@ testChartData.YAxis = new Axis("Y Axis");
 testChartData.XAxis = new Axis("X Axis");
 
 
+// Get actual data sets onto the page for use
+
 const $chartContainer = $("#chart-container");
 const chartLoader = new ChartLoader([testChartData], $chartContainer.find("#content"));
 chartLoader.renderCharts();

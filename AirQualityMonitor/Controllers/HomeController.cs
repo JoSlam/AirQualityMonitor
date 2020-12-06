@@ -18,7 +18,13 @@ namespace AirQualityMonitor.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var response = await dbService.GetAllReadingsAsync();
+            var response = await dbService.GetLatestReadings();
+
+            // Get most recent record
+            // Get data for 7 days prior
+
+            // Build list of chart data
+            // Return list of chart data
             return View(response);
         }
     }
