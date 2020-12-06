@@ -87,7 +87,8 @@ export class ChartLoader {
                 label: item.Label,
                 data: item.Values,
                 backgroundColor: colour,
-                borderColor: colour
+                borderColor: colour,
+                fill: false
             } as Chart.ChartDataSets;
 
             newDataSetList.push(newDataSetObj);
