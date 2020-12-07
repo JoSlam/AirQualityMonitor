@@ -4,26 +4,12 @@
     Layout = "~/Pages/_Layout.cshtml";
 }
 
-<h2>Home</h2>
-
-<h5>Data</h5>
-<ul>
-    @foreach (var item in Model)
-    {
-        <li>Chart ID: @item.Location</li>
-    }
-</ul>
-
-<div id="chart-container"></div>
+<div>
+    <h3>Recent metrics</h3>
+    <div id="chart-container"></div>
+</div>
 
 
 <script type="text/javascript">
-    //var chartDataSets = getRawHTML(`@Newtonsoft.Json.JsonConvert.SerializeObject(Model, Newtonsoft.Json.Formatting.Indented)`);
     var locationChartData = `@Html.Raw(Json.Serialize(Model))`;
-
-
-    function getRawHTML(val) {
-        const el = $("div").val(val);
-        return el.text();
-    }
 </script>

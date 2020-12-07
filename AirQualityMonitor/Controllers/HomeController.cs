@@ -60,7 +60,7 @@ namespace AirQualityMonitor.Controllers
                 XAxis = new Axis("Day of the week")
             };
 
-            var setReadings = GetStatisticReadingList(locationReadings, readingType);
+            var statReadingsSet = GetStatisticReadingList(locationReadings, readingType);
 
             var minSet = new DataSet
             {
@@ -77,23 +77,13 @@ namespace AirQualityMonitor.Controllers
                 Label = $"{readingType}: Average"
             };
 
-
-            var timestampGroups = setReadings
+/*
+            var timestampGroups = statReadingsSet
                 .GroupBy(i => i.timestamp)
                 .ToList();
 
             foreach (var item in timestampGroups)
             {
-                /*var dayTimestamp = item.FirstOrDefault()?.timestamp;
-                var dateTime = GetDateTimeFromTimestamp(dayTimestamp.GetValueOrDefault());
-
-                var dayString = dateTime.DayOfWeek.ToString();
-
-                if (!chartData.Labels.Contains(dayString))
-                {
-                    chartData.Labels.Add(dayString);
-                }*/
-
                 var valuesList = item.Select(groupValues => groupValues.value).DefaultIfEmpty();
 
                 var minValue = valuesList.Min();
@@ -104,7 +94,29 @@ namespace AirQualityMonitor.Controllers
 
                 var avgValue = valuesList.Average();
                 avgSet.Values.Add(avgValue);
+            }*/
+
+            var currDate = DateTime.Today - TimeSpan.FromDays(8);
+
+            while (currDate != DateTime.Today)
+            {
+                var currDateTimestamp = GetTimestampFromDateTime(currDate);
+                var dayData = statReadingsSet.Where(i => i.timestamp == currDateTimestamp);
+
+                var valuesList = dayData.Select(groupValues => groupValues.value).DefaultIfEmpty();
+
+                var minValue = valuesList.Min();
+                minSet.Values.Add(minValue);
+
+                var maxValue = valuesList.Max();
+                maxSet.Values.Add(maxValue);
+
+                var avgValue = valuesList.Average();
+                avgSet.Values.Add(avgValue);
+
+                currDate += TimeSpan.FromDays(1);
             }
+
 
             chartData.DataSets.Add(minSet);
             chartData.DataSets.Add(maxSet);
@@ -117,19 +129,21 @@ namespace AirQualityMonitor.Controllers
         {
             return locationReadings
                 .Select(i =>
-                    {
-                        // get date timestamp
-                        var dateTime = GetDateTimeFromTimestamp(i.Timestamp);
-                        var dateTimestamp = ((DateTimeOffset)dateTime.Date).ToUnixTimeSeconds();
+                {
+                    // get date timestamp
+                    var dateTime = GetDateTimeFromTimestamp(i.Timestamp);
+                    long dateTimestamp = GetTimestampFromDateTime(dateTime);
 
-                        return new StatisticReading
-                        {
-                            timestamp = dateTimestamp,
-                            value = GetStatisticReading(i, readingType)
-                        };
-                    })
+                    return new StatisticReading
+                    {
+                        timestamp = dateTimestamp,
+                        value = GetStatisticReading(i, readingType)
+                    };
+                })
                 .ToList();
         }
+
+        
 
         public float GetStatisticReading(Reading reading, ReadingType type)
         {
@@ -155,6 +169,11 @@ namespace AirQualityMonitor.Controllers
             }
 
             return dateList;
+        }
+
+        private long GetTimestampFromDateTime(DateTime dateTime)
+        {
+            return ((DateTimeOffset)dateTime.Date).ToUnixTimeSeconds();
         }
 
         public DateTime GetDateTimeFromTimestamp(long seconds)
