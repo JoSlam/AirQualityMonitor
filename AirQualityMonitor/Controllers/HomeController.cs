@@ -26,24 +26,28 @@ namespace AirQualityMonitor.Controllers
             // Get data for 7 days prior
             var recentReadings = await dbService.GetLatestReadings();
 
-            var chartDataList = new List<ChartData>();
-            var locationGroups = recentReadings
-                        .GroupBy(i => i.Location)
-                        .ToList();
+            var locationChartList = new List<LocationChartData>();
+            var locationGroups = recentReadings.GroupBy(i => i.Location).ToList();
 
             locationGroups.ForEach(group =>
             {
                 var location = group.Select(i => i).FirstOrDefault()?.Location;
-                chartDataList.Add(GetChartData(group.ToList(), ReadingType.NO2, location));
-                chartDataList.Add(GetChartData(group.ToList(), ReadingType.Fine, location));
-                chartDataList.Add(GetChartData(group.ToList(), ReadingType.Coarse, location));
+
+                var chartList = new List<ChartData>
+                {
+                    GetChartData(group.ToList(), ReadingType.NO2, location),
+                    GetChartData(group.ToList(), ReadingType.Fine, location),
+                    GetChartData(group.ToList(), ReadingType.Coarse, location)
+                };
+
+                locationChartList.Add(new LocationChartData() { Location = location, Charts = chartList });
             });
 
-            return View(chartDataList);
+            return View(locationChartList);
         }
 
 
-        
+
 
         private ChartData GetChartData(List<Reading> locationReadings, ReadingType readingType, string location)
         {

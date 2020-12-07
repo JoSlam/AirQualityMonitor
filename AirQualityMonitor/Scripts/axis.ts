@@ -1,3 +1,3 @@
 ﻿export class Axis {
-    constructor(public Label: string) { }
+    constructor(public label: string) { }
 }

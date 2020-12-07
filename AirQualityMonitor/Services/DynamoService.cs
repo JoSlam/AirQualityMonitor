@@ -36,8 +36,7 @@ namespace AirQualityMonitor.Services
         public async Task<List<Reading>> GetLatestReadings(string deviceID = "")
         {
             // Generate a timestamp
-            //var sevenDaysAgo = (DateTimeOffset)DateTime.UtcNow - TimeSpan.FromDays(7);
-            var sevenDaysAgo = (DateTimeOffset)DateTime.Today - TimeSpan.FromDays(7);
+            var sevenDaysAgo = (DateTimeOffset)DateTime.Today - TimeSpan.FromDays(8);
             var timeStamp = sevenDaysAgo.ToUnixTimeSeconds();
 
             // Create a query for last 7 days of data

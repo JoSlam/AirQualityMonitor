@@ -47,23 +47,24 @@ export class ChartLoader {
         return {
             type: 'line',
             data: {
-                labels: chartData.Labels, // consider passing in Date instead of string
-                datasets: this.buildDataSets(chartData.DataSets)
+                labels: chartData.labels, // consider passing in Date instead of string
+                datasets: this.buildDataSets(chartData.dataSets)
             },
             options: this.getChartOptions(chartData)
         };
     }
 
     private $getChartCanvas(): JQuery {
-        return $(`<canvas id="chart-${ChartLoader.chartSeed++}" class="col-4" width="400" height="400">`);
+        return $(`<canvas id="chart-${ChartLoader.chartSeed++}" class="col m4" width="400" height="400">`);
     }
 
     private getChartOptions(chartData: ChartData): Chart.ChartOptions {
         const chartOptions = {
             scales: {
-                xAxes: [this.getAxis(chartData.XAxis)],
-                yAxes: [this.getAxis(chartData.YAxis)]
-            }
+                xAxes: [this.getAxis(chartData.xAxis)],
+                yAxes: [this.getAxis(chartData.yAxis)]
+            },
+            responsive: false
         } as Chart.ChartOptions;
 
         return chartOptions;
@@ -74,7 +75,7 @@ export class ChartLoader {
             display: true,
             scaleLabel: {
                 display: true,
-                labelString: axis.Label
+                labelString: axis.label
             }
         } as Chart.CommonAxe;
     }
@@ -85,8 +86,8 @@ export class ChartLoader {
         dataSets.forEach(item => {
             const colour = this.getNewColourString(newDataSetList.length);
             const newDataSetObj = {
-                label: item.Label,
-                data: item.Values,
+                label: item.label,
+                data: item.values,
                 backgroundColor: colour,
                 borderColor: colour,
                 fill: false

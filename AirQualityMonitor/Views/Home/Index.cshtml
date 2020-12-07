@@ -1,4 +1,4 @@
-﻿@model List<AirQualityMonitor.Models.ChartData>
+﻿@model List<AirQualityMonitor.Models.LocationChartData>
 @{
     ViewData["Title"] = "Home";
     Layout = "~/Pages/_Layout.cshtml";
@@ -10,15 +10,20 @@
 <ul>
     @foreach (var item in Model)
     {
-        <li>Chart ID: @item.ID</li>
+        <li>Chart ID: @item.Location</li>
     }
 </ul>
 
-<div id="chart-container">
-    <div id="content" class="row"></div>
-</div>
+<div id="chart-container"></div>
 
 
 <script type="text/javascript">
-    var chartDataSets = "@Model.Count";
+    //var chartDataSets = getRawHTML(`@Newtonsoft.Json.JsonConvert.SerializeObject(Model, Newtonsoft.Json.Formatting.Indented)`);
+    var locationChartData = `@Html.Raw(Json.Serialize(Model))`;
+
+
+    function getRawHTML(val) {
+        const el = $("div").val(val);
+        return el.text();
+    }
 </script>

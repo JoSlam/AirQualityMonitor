@@ -1,5 +1,5 @@
 ﻿export class DataSet {
     constructor();
-    constructor(Label: string, Values: number[]);
-    constructor(public Label?: string, public Values?: number[]) { }
+    constructor(label: string, values: number[]);
+    constructor(public label?: string, public values?: number[]) { }
 }
