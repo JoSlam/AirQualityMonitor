@@ -6,6 +6,8 @@ import { DataSet } from "./dataSet";
 export class ChartLoader {
     private charts: Chart[] = [];
 
+    private static chartSeed: number = 1;
+
     private chartColors: any = {
         red: 'rgb(255, 99, 132)',
         orange: 'rgb(255, 159, 64)',
@@ -15,7 +17,6 @@ export class ChartLoader {
         purple: 'rgb(153, 102, 255)',
         grey: 'rgb(201, 203, 207)'
     };
-
 
 
     constructor(public chartData: ChartData[], private $container: JQuery) { }
@@ -29,7 +30,7 @@ export class ChartLoader {
     }
 
     private renderChart(chartData: ChartData): Chart {
-        const $chartCanvas = this.$getChartCanvas(chartData.ID);
+        const $chartCanvas = this.$getChartCanvas();
 
         // Append chart to container
         this.$container.append($chartCanvas);
@@ -53,8 +54,8 @@ export class ChartLoader {
         };
     }
 
-    private $getChartCanvas(chartID: number): JQuery {
-        return $(`<canvas id="chart-${chartID}" class="col-4" width="400" height="400">`);
+    private $getChartCanvas(): JQuery {
+        return $(`<canvas id="chart-${ChartLoader.chartSeed++}" class="col-4" width="400" height="400">`);
     }
 
     private getChartOptions(chartData: ChartData): Chart.ChartOptions {

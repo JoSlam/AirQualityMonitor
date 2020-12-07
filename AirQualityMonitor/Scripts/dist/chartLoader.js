@@ -4,6 +4,15 @@ export class ChartLoader {
         this.chartData = chartData;
         this.$container = $container;
         this.charts = [];
+        this.chartColors = {
+            red: 'rgb(255, 99, 132)',
+            orange: 'rgb(255, 159, 64)',
+            yellow: 'rgb(255, 205, 86)',
+            green: 'rgb(75, 192, 192)',
+            blue: 'rgb(54, 162, 235)',
+            purple: 'rgb(153, 102, 255)',
+            grey: 'rgb(201, 203, 207)'
+        };
     }
     renderCharts() {
         this.$container.empty();
@@ -13,54 +22,66 @@ export class ChartLoader {
         });
     }
     renderChart(chartData) {
-        const $chartCanvas = this.$getChartCanvas(chartData.ID);
-        const chartContext = $chartCanvas.get(0).getContext("2d");
-        const chartOptions = this.getChartOptions();
-        const chart = new Chart(chartContext, chartOptions);
+        const $chartCanvas = this.$getChartCanvas();
         // Append chart to container
         this.$container.append($chartCanvas);
+        const chartOptions = this.getChartConfiguration(chartData);
+        const chartContext = $chartCanvas.get(0).getContext("2d");
+        const chart = new Chart(chartContext, chartOptions);
         return chart;
     }
-    getChartOptions() {
+    getChartConfiguration(chartData) {
         return {
-            type: 'bar',
+            type: 'line',
             data: {
-                labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
-                datasets: [{
-                        label: '# of Votes',
-                        data: [12, 19, 3, 5, 2, 3],
-                        backgroundColor: [
-                            'rgba(255, 99, 132, 0.2)',
-                            'rgba(54, 162, 235, 0.2)',
-                            'rgba(255, 206, 86, 0.2)',
-                            'rgba(75, 192, 192, 0.2)',
-                            'rgba(153, 102, 255, 0.2)',
-                            'rgba(255, 159, 64, 0.2)'
-                        ],
-                        borderColor: [
-                            'rgba(255, 99, 132, 1)',
-                            'rgba(54, 162, 235, 1)',
-                            'rgba(255, 206, 86, 1)',
-                            'rgba(75, 192, 192, 1)',
-                            'rgba(153, 102, 255, 1)',
-                            'rgba(255, 159, 64, 1)'
-                        ],
-                        borderWidth: 1
-                    }]
+                labels: chartData.Labels,
+                datasets: this.buildDataSets(chartData.DataSets)
             },
-            options: {
-                scales: {
-                    yAxes: [{
-                            ticks: {
-                                beginAtZero: true
-                            }
-                        }]
-                }
+            options: this.getChartOptions(chartData)
+        };
+    }
+    $getChartCanvas() {
+        return $(`<canvas id="chart-${ChartLoader.chartSeed++}" class="col-4" width="400" height="400">`);
+    }
+    getChartOptions(chartData) {
+        const chartOptions = {
+            scales: {
+                xAxes: [this.getAxis(chartData.XAxis)],
+                yAxes: [this.getAxis(chartData.YAxis)]
+            }
+        };
+        return chartOptions;
+    }
+    getAxis(axis) {
+        return {
+            display: true,
+            scaleLabel: {
+                display: true,
+                labelString: axis.Label
             }
         };
     }
-    $getChartCanvas(chartID) {
-        return $(`<canvas id="chart-${chartID}" class="col-4" width="400" height="400">`);
+    buildDataSets(dataSets) {
+        const newDataSetList = [];
+        dataSets.forEach(item => {
+            const colour = this.getNewColourString(newDataSetList.length);
+            const newDataSetObj = {
+                label: item.Label,
+                data: item.Values,
+                backgroundColor: colour,
+                borderColor: colour,
+                fill: false
+            };
+            newDataSetList.push(newDataSetObj);
+        });
+        return newDataSetList;
+    }
+    getNewColourString(dataSetCount) {
+        const colorNames = Object.keys(this.chartColors);
+        const colorName = colorNames[dataSetCount % colorNames.length];
+        const newColor = this.chartColors[colorName];
+        return newColor;
     }
 }
+ChartLoader.chartSeed = 1;
 //# sourceMappingURL=chartLoader.js.map

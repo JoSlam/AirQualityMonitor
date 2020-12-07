@@ -1,7 +1,12 @@
-﻿using AirQualityMonitor.Services;
-using Amazon.DynamoDBv2;
-using Microsoft.AspNetCore.Mvc;
+﻿using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+
+using AirQualityMonitor.Services;
+using Amazon.DynamoDBv2;
+using System;
+using System.Collections.Generic;
+using AirQualityMonitor.Models;
 
 namespace AirQualityMonitor.Controllers
 {
@@ -18,14 +23,148 @@ namespace AirQualityMonitor.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var response = await dbService.GetLatestReadings();
-
-            // Get most recent record
             // Get data for 7 days prior
+            var recentReadings = await dbService.GetLatestReadings();
 
-            // Build list of chart data
-            // Return list of chart data
-            return View(response);
+            var chartDataList = new List<ChartData>();
+            var locationGroups = recentReadings
+                        .GroupBy(i => i.Location)
+                        .ToList();
+
+            locationGroups.ForEach(group =>
+            {
+                var location = group.Select(i => i).FirstOrDefault()?.Location;
+                chartDataList.Add(GetChartData(group.ToList(), ReadingType.NO2, location));
+                chartDataList.Add(GetChartData(group.ToList(), ReadingType.Fine, location));
+                chartDataList.Add(GetChartData(group.ToList(), ReadingType.Coarse, location));
+            });
+
+            return View(chartDataList);
         }
+
+
+        
+
+        private ChartData GetChartData(List<Reading> locationReadings, ReadingType readingType, string location)
+        {
+            // Build chart data object
+            var chartData = new ChartData
+            {
+                Title = $"{location}: {readingType}",
+                Labels = GetChartLabels(DateTime.Today - TimeSpan.FromDays(7)),
+                YAxis = new Axis($"{readingType} per microgram"),
+                XAxis = new Axis("Day of the week")
+            };
+
+            var setReadings = GetStatisticReadingList(locationReadings, readingType);
+
+            var minSet = new DataSet
+            {
+                Label = $"{readingType}: Minimum"
+            };
+
+            var maxSet = new DataSet
+            {
+                Label = $"{readingType}: Maximum"
+            };
+
+            var avgSet = new DataSet
+            {
+                Label = $"{readingType}: Average"
+            };
+
+
+            var timestampGroups = setReadings
+                .GroupBy(i => i.timestamp)
+                .ToList();
+
+            foreach (var item in timestampGroups)
+            {
+                /*var dayTimestamp = item.FirstOrDefault()?.timestamp;
+                var dateTime = GetDateTimeFromTimestamp(dayTimestamp.GetValueOrDefault());
+
+                var dayString = dateTime.DayOfWeek.ToString();
+
+                if (!chartData.Labels.Contains(dayString))
+                {
+                    chartData.Labels.Add(dayString);
+                }*/
+
+                var valuesList = item.Select(groupValues => groupValues.value).DefaultIfEmpty();
+
+                var minValue = valuesList.Min();
+                minSet.Values.Add(minValue);
+
+                var maxValue = valuesList.Max();
+                maxSet.Values.Add(maxValue);
+
+                var avgValue = valuesList.Average();
+                avgSet.Values.Add(avgValue);
+            }
+
+            chartData.DataSets.Add(minSet);
+            chartData.DataSets.Add(maxSet);
+            chartData.DataSets.Add(avgSet);
+
+            return chartData;
+        }
+
+        private List<StatisticReading> GetStatisticReadingList(List<Reading> locationReadings, ReadingType readingType)
+        {
+            return locationReadings
+                .Select(i =>
+                    {
+                        // get date timestamp
+                        var dateTime = GetDateTimeFromTimestamp(i.Timestamp);
+                        var dateTimestamp = ((DateTimeOffset)dateTime.Date).ToUnixTimeSeconds();
+
+                        return new StatisticReading
+                        {
+                            timestamp = dateTimestamp,
+                            value = GetStatisticReading(i, readingType)
+                        };
+                    })
+                .ToList();
+        }
+
+        public float GetStatisticReading(Reading reading, ReadingType type)
+        {
+            string value = type switch
+            {
+                ReadingType.NO2 => reading.NO2_Concentration,
+                ReadingType.Fine => reading.Fine_PM_Concentration,
+                ReadingType.Coarse => reading.Coarse_PM_Concentration,
+                _ => "",
+            };
+            return float.Parse(value);
+        }
+        private List<string> GetChartLabels(DateTime startDate)
+        {
+            var dateList = new List<string>();
+
+            while (startDate != DateTime.Today)
+            {
+                var dateString = startDate.DayOfWeek.ToString();
+                dateList.Add(dateString);
+
+                startDate += TimeSpan.FromDays(1);
+            }
+
+            return dateList;
+        }
+
+        public DateTime GetDateTimeFromTimestamp(long seconds)
+        {
+            return new DateTime(1970, 1, 1, 0, 0, 0, 0)
+                .AddSeconds(seconds);
+        }
+
+        public enum ReadingType
+        {
+            NO2 = 1,
+            Fine = 2,
+            Coarse = 3
+        }
+
     }
 }
