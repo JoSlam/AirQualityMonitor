@@ -96,9 +96,9 @@ namespace AirQualityMonitor.Controllers
                 avgSet.Values.Add(avgValue);
             }*/
 
-            var currDate = DateTime.Today - TimeSpan.FromDays(8);
+            var currDate = DateTime.Today - TimeSpan.FromDays(6);
 
-            while (currDate != DateTime.Today)
+            while (currDate <= DateTime.Today)
             {
                 var currDateTimestamp = GetTimestampFromDateTime(currDate);
                 var dayData = statReadingsSet.Where(i => i.timestamp == currDateTimestamp);
